@@ -63,21 +63,21 @@ class MRIModel(pl.LightningModule):
     def train_data_transform(self):
         raise NotImplementedError
 
-    @staticmethod
+    @pl.data_loader
     def train_dataloader(self):
         return self._create_data_loader(self.train_data_transform(), data_partition='train')
 
     def val_data_transform(self):
         raise NotImplementedError
 
-    @staticmethod
+    @pl.data_loader
     def val_dataloader(self):
         return self._create_data_loader(self.val_data_transform(), data_partition='val')
 
     def test_data_transform(self):
         raise NotImplementedError
 
-    @staticmethod
+    @pl.data_loader
     def test_dataloader(self):
         return self._create_data_loader(self.test_data_transform(), data_partition='test', sample_rate=1.)
 
