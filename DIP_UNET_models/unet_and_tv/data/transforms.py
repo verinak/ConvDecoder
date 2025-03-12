@@ -50,7 +50,7 @@ def apply_mask(data, mask_func, seed=None):
 
 def fft2(data):
     """
-    Apply centered 2 dimensional Fast Fourier Transform.
+    Apply centered 2-dimensional Fast Fourier Transform.
 
     Args:
         data (torch.Tensor): Complex valued input data containing at least 3 dimensions: dimensions
@@ -60,13 +60,25 @@ def fft2(data):
     Returns:
         torch.Tensor: The FFT of the input.
     """
-    assert data.size(-1) == 2
-    data = ifftshift(data, dim=(-3, -2))
+    assert data.size(-1) == 2  # Ensure last dimension has size 2 (real & imaginary parts)
+
+    # Ensure contiguous memory layout before converting
+    data = data.contiguous()
+
+    # Convert real + imaginary format to complex tensor
+    data = torch.view_as_complex(data)
+
+    # Apply centered FFT
+    data = torch.fft.ifftshift(data, dim=(-2, -1))
     data = torch.fft.fft2(data, norm="ortho")
-    data = fftshift(data, dim=(-3, -2))
+    data = torch.fft.fftshift(data, dim=(-2, -1))
+
+    # Convert back to real + imaginary format
+    data = torch.view_as_real(data)
+
     return data
 
-
+'''
 def ifft2(data):
     """
     Apply centered 2-dimensional Inverse Fast Fourier Transform.
@@ -81,10 +93,46 @@ def ifft2(data):
     """
     assert data.size(-1) == 2
     data = ifftshift(data, dim=(-3, -2))
-    data = torch.fft.ifft2(data, norm="ortho")
+    #data = torch.ifft(data, 2, normalized=True)
+    data = torch.fft.ifftn(data, dim=(-3, -2), norm="ortho")
     data = fftshift(data, dim=(-3, -2))
     return data
+'''
+import torch
+import torch.fft
 
+import torch
+import torch.fft
+
+def ifft2(data):
+    """
+    Apply centered 2-dimensional Inverse Fast Fourier Transform.
+
+    Args:
+        data (torch.Tensor): Complex valued input data containing at least 3 dimensions: dimensions
+            -3 & -2 are spatial dimensions and dimension -1 has size 2. All other dimensions are
+            assumed to be batch dimensions.
+
+    Returns:
+        torch.Tensor: The IFFT of the input.
+    """
+    assert data.size(-1) == 2  # Ensure last dimension has size 2 (real & imaginary parts)
+
+    # Ensure contiguous memory layout before converting
+    data = data.contiguous()
+    
+    # Convert real + imaginary format to complex tensor
+    data = torch.view_as_complex(data)
+
+    # Apply centered IFFT
+    data = torch.fft.ifftshift(data, dim=(-2, -1))
+    data = torch.fft.ifft2(data, norm="ortho")
+    data = torch.fft.fftshift(data, dim=(-2, -1))
+
+    # Convert back to real + imaginary format
+    data = torch.view_as_real(data)
+
+    return data
 
 def complex_abs(data):
     """
