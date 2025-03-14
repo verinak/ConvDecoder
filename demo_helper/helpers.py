@@ -158,7 +158,7 @@ def get_mask(slice_ksp_torchtensor, slice_ksp,factor=4,cent=0.07):
     mask1d[mask1d.shape[-1]//2+160:] =0
     mask2d = np.repeat(mask1d[None,:], slice_ksp.shape[1], axis=0).astype(int) # Turning 1D Mask into 2D that matches data dimensions
     mask2d = np.pad(mask2d,((0,),((slice_ksp.shape[-1]-mask2d.shape[-1])//2,)),mode='constant') # Zero padding to make sure dimensions match up
-    mask = to_tensor( np.array( [[mask2d[0][np.newaxis].T]] ) ).type(dtype).detach().cpu()
+    mask = torch.tensor(np.array([[mask2d[0][np.newaxis].T]]), dtype=torch.float32).detach().cpu()
     return mask, mask1d, mask2d
 
 def apply_mask(data, mask_func = None, mask = None, seed=None):
